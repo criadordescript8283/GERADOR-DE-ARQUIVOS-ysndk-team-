@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Pastas ZIP</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #121212;
+            color: #ffffff;
+        }
+        .container {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            flex-grow: 1;
+            justify-content: center;
+        }
+        .btn-gerar {
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #fff;
+            background-color: #00ff66;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 255, 102, 0.4);
+            transition: transform 0.2s, background-color 0.2s;
+            width: 200px;
+        }
+        .btn-gerar:hover {
+            background-color: #00cc52;
+            transform: scale(1.05);
+        }
+        .btn-gerar:active {
+            transform: scale(0.95);
+        }
+        .config-container {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        label {
+            font-size: 14px;
+            color: #aaa;
+        }
+        input[type="number"] {
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 6px;
+            border: 2px solid #333;
+            background-color: #222;
+            color: #fff;
+            text-align: center;
+            width: 100px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        input[type="number"]:focus {
+            border-color: #00ff66;
+        }
+        /* Estilo do Rodapé / Créditos */
+        footer {
+            padding-bottom: 20px;
+            font-size: 13px;
+            color: #555;
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+        footer span {
+            color: #00ff66;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <button class="btn-gerar" id="btnGerar">GERAR</button>
+
+        <div class="config-container">
+            <label for="quantidade">Quantas pastas?</label>
+            <input type="number" id="quantidade" value="30" min="1" max="300">
+        </div>
+    </div>
+
+    <footer>
+        Desenvolvido por <span>@zawarudo yt</span> & <span>@ysndk Team</span>
+    </footer>
+
+    <script>
+        document.getElementById('btnGerar').addEventListener('click', function() {
+            const inputQuantidade = document.getElementById('quantidade');
+            let quantidade = parseInt(inputQuantidade.value);
+
+            // Validações básicas de segurança
+            if (isNaN(quantidade) || quantidade < 1) {
+                alert("Por favor, insira um número válido maior que 0.");
+                return;
+            }
+            if (quantidade > 300) {
+                alert("O limite máximo permitido é de 300 pastas.");
+                quantidade = 300;
+                inputQuantidade.value = 300;
+            }
+
+            // Cria uma nova instância do JSZip
+            const zip = new JSZip();
+            
+            // Cria a pasta principal
+            const pastaPrincipal = zip.folder("Contas_Geradas");
+
+            // Loop baseado na quantidade escolhida pelo usuário
+            for (let i = 1; i <= quantidade; i++) {
+                pastaPrincipal.folder(`Conta ${i}`);
+            }
+
+            // Altera o estado do botão
+            const botao = this;
+            botao.innerText = "GERANDO...";
+            botao.style.backgroundColor = "#888";
+            botao.disabled = true;
+            inputQuantidade.disabled = true;
+
+            // Gera o arquivo ZIP e inicia o download
+            zip.generateAsync({ type: "blob" })
+                .then(function(content) {
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(content);
+                    link.download = "contas.zip";
+                    
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+
+                    // Restaura o botão e o input
+                    botao.innerText = "GERAR";
+                    botao.style.backgroundColor = "#00ff66";
+                    botao.disabled = false;
+                    inputQuantidade.disabled = false;
+                });
+        });
+    </script>
+
+</body>
+</html>
